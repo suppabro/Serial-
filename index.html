@@ -85,79 +85,50 @@
         const nextBtn = document.getElementById('next-btn');
 
         let upcomingTracks = [];
-
-        // API Servers ලැයිස්තුව (එකක් ඩවුන් වුනොත් අනිත් එකට යයි)
-        const apiInstances = [
-            "https://pipedapi.kavin.rocks",
-            "https://pipedapi.tokhmi.xyz",
-            "https://api.piped.projectsegfau.lt",
-            "https://piped-api.garudalinux.org",
-            "https://piped-api.lunar.icu",
-            "https://pipedapi.smarthome-nj.de"
-        ];
-
-        // වැඩ කරන Server එක හොයාගෙන Data ගන්නා විශේෂ Function එක
-        async function fetchWithFallback(endpoint) {
-            for (let instance of apiInstances) {
-                try {
-                    const response = await fetch(`${instance}${endpoint}`);
-                    if (response.ok) {
-                        return await response.json();
-                    }
-                } catch (error) {
-                    console.log(`Server down: ${instance}. Trying next...`);
-                }
-            }
-            throw new Error("All API servers are down.");
-        }
+        
+        // ඔයාගේ අලුත් Vercel Server එකේ Link එක
+        const API_BASE = "https://ytmusicapi-ruby.vercel.app";
 
         async function startSearch() {
             const query = searchInput.value.trim();
             if (!query) return alert("Please enter a song name!");
 
-            trackInfo.innerText = "Connecting to available servers...";
+            trackInfo.innerText = "Searching our custom server...";
             searchBtn.disabled = true;
 
             try {
-                // Auto-Fallback එක හරහා Search කිරීම
-                const searchData = await fetchWithFallback(`/search?q=${encodeURIComponent(query)}&filter=music_songs`);
+                // ඔයාගේ සර්වර් එකෙන් සින්දුව හොයනවා
+                const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
                 
-                if (!searchData || !searchData.items || searchData.items.length === 0) throw new Error("No results found.");
+                if (data.error) throw new Error(data.error);
 
-                const firstResult = searchData.items[0];
-                const videoId = firstResult.url.split('/watch?v=')[1];
+                // ඊළඟට එන සින්දු ලිස්ට් එක Save කරගන්නවා
+                upcomingTracks = data.related || [];
                 
-                await playVideo(videoId, firstResult.title);
+                // සින්දුව Play කරන්න යවනවා
+                await playVideo(data.videoId, data.title);
 
             } catch (error) {
-                trackInfo.innerText = "All servers are busy. Please try again later.";
+                trackInfo.innerText = "Error finding song. Please try again.";
                 console.error(error);
             }
             searchBtn.disabled = false;
         }
 
         async function playVideo(videoId, title) {
-            trackInfo.innerText = "Extracting Audio from active server...";
+            trackInfo.innerText = "Extracting Audio from custom server...";
             nextBtn.disabled = true;
 
             try {
-                // Auto-Fallback එක හරහා Stream Data ගැනීම
-                const streamData = await fetchWithFallback(`/streams/${videoId}`);
+                // ඔයාගේ සර්වර් එකෙන් කෙලින්ම Audio Link එක ගන්නවා
+                const response = await fetch(`${API_BASE}/stream?id=${videoId}`);
+                const data = await response.json();
 
-                const audioStreams = streamData.audioStreams;
-                const bestAudio = audioStreams.find(stream => stream.mimeType.includes('audio/mp4')) || audioStreams[0];
-
-                if (streamData.relatedStreams) {
-                    upcomingTracks = streamData.relatedStreams
-                        .filter(stream => stream.type === 'stream' && !stream.isShort)
-                        .map(stream => ({
-                            id: stream.url.split('/watch?v=')[1],
-                            title: stream.title
-                        }));
-                }
+                if (data.error) throw new Error(data.error);
 
                 trackInfo.innerText = "Playing: " + title;
-                audioPlayer.src = bestAudio.url;
+                audioPlayer.src = data.url;
                 audioPlayer.style.display = "block";
                 nextBtn.style.display = "inline-block";
                 
