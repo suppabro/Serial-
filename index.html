@@ -197,6 +197,135 @@
     </div>
 
     <footer>Developed by Supun Dilshan</footer>
-
+```javascript
+<script src="https://www.youtube.com/iframe_api"></script>
+​<script>
+const songTitle = document.getElementById('song-title');
+const artistName = document.getElementById('artist-name');
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+const playPauseBtn = document.getElementById('play-pause-btn');
+const nextBtn = document.getElementById('next-btn');
+const artwork = document.getElementById('artwork');
+​let upcomingTracks = [];
+let isPlaying = false;
+​// Vercel එකයි, Backup විදියට Piped එකයි දෙකම තියෙනවා.
+const VERCEL_API = "https://ytmusicapi-ruby.vercel.app";
+const FALLBACK_APIS = [
+"https://pipedapi.tokhmi.xyz",
+"https://pipedapi.kavin.rocks",
+"https://api.piped.projectsegfau.lt"
+];
+​let ytPlayer;
+let isPlayerReady = false;
+​function onYouTubeIframeAPIReady() {
+ytPlayer = new YT.Player('youtube-player', {
+height: '10', width: '10',
+playerVars: { 'autoplay': 1, 'controls': 0, 'showinfo': 0 },
+events: {
+'onReady': () => { isPlayerReady = true; },
+'onStateChange': onPlayerStateChange,
+'onError': onPlayerError
+}
+});
+}
+​function onPlayerStateChange(event) {
+if (event.data === YT.PlayerState.PLAYING) {
+artwork.style.animationPlayState = 'running';
+playPauseBtn.innerText = '⏸';
+isPlaying = true;
+} else if (event.data === YT.PlayerState.PAUSED) {
+artwork.style.animationPlayState = 'paused';
+playPauseBtn.innerText = '▶';
+isPlaying = false;
+} else if (event.data === YT.PlayerState.ENDED) {
+playNextTrack();
+}
+}
+​function onPlayerError(event) {
+artistName.innerText = "Error loading. Skipping...";
+setTimeout(playNextTrack, 2000);
+}
+​function togglePlay() {
+if (!isPlayerReady) return;
+if (isPlaying) { ytPlayer.pauseVideo(); }
+else { ytPlayer.playVideo(); }
+}
+​async function fetchSongData(query) {
+try {
+const res = await fetch(${VERCEL_API}/search?q=${encodeURIComponent(query)});
+const data = await res.json();
+if (!data.error && data.videoId) {
+return { videoId: data.videoId, title: data.title, related: data.related || [] };
+}
+} catch (error) { console.log("Vercel Search Failed, trying fallback..."); }
+​for (let api of FALLBACK_APIS) {
+try {
+const res = await fetch(${api}/search?q=${encodeURIComponent(query)}&filter=music_songs);
+const data = await res.json();
+if (data.items && data.items.length > 0) {
+const vidId = data.items[0].url.split('v=')[1];
+return { videoId: vidId, title: data.items[0].title, related: [] };
+}
+} catch (e) { console.log(${api} failed.); }
+}
+throw new Error("All servers are down");
+}
+​async function startSearch() {
+if (!isPlayerReady) return alert("Loading Player...");
+const query = searchInput.value.trim();
+if (!query) return;
+​songTitle.innerText = "Searching...";
+artistName.innerText = "Please wait...";
+searchBtn.disabled = true;
+artwork.style.animationPlayState = 'paused';
+​try {
+const songData = await fetchSongData(query);
+upcomingTracks = songData.related;
+playVideo(songData.videoId, songData.title);
+} catch (error) {
+songTitle.innerText = "Search Failed";
+artistName.innerText = "Please try again later";
+}
+searchBtn.disabled = false;
+}
+​function playVideo(videoId, title) {
+const thumbnailUrl = https://img.youtube.com/vi/${videoId}/hqdefault.jpg;
+artwork.src = thumbnailUrl;
+​const shortTitle = title.length > 30 ? title.substring(0, 30) + "..." : title;
+songTitle.innerText = shortTitle;
+artistName.innerText = "Now Playing 🎵";
+​playPauseBtn.disabled = false;
+nextBtn.disabled = false;
+​ytPlayer.loadVideoById(videoId);
+​if ('mediaSession' in navigator) {
+navigator.mediaSession.metadata = new MediaMetadata({
+title: shortTitle,
+artist: "Smart Stream Player",
+artwork: [{ src: thumbnailUrl, sizes: "512x512", type: "image/jpeg" }]
+});
+navigator.mediaSession.setActionHandler('nexttrack', playNextTrack);
+navigator.mediaSession.setActionHandler('play', togglePlay);
+navigator.mediaSession.setActionHandler('pause', togglePlay);
+}
+}
+​function playNextTrack() {
+if (upcomingTracks.length > 0) {
+artistName.innerText = "Loading next song...";
+artwork.style.animationPlayState = 'paused';
+const randomIndex = Math.floor(Math.random() * upcomingTracks.length);
+const nextTrack = upcomingTracks.splice(randomIndex, 1)[0];
+playVideo(nextTrack.id, nextTrack.title);
+} else {
+songTitle.innerText = "Queue Ended";
+artistName.innerText = "Search another song";
+ytPlayer.stopVideo();
+artwork.style.animationPlayState = 'paused';
+}
+}
+​searchInput.addEventListener("keypress", (e) => {
+if (e.key === "Enter") { e.preventDefault(); startSearch(); }
+});
+</script>
     </body>
 </html>
