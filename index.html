@@ -37,6 +37,8 @@
             width: 60%;
             font-size: 14px;
             text-align: center;
+            background: #2a2a2a;
+            color: white;
         }
         button {
             background-color: #1db954;
@@ -82,59 +84,78 @@
         const searchBtn = document.getElementById('search-btn');
         const nextBtn = document.getElementById('next-btn');
 
-        let upcomingTracks = []; // ඊළඟට ප්ලේ වෙන්න තියෙන සමාන සින්දු ලිස්ට් එක
+        let upcomingTracks = [];
 
-        // 1. Search කරලා පළවෙනි සින්දුව හොයාගැනීම
+        // API Servers ලැයිස්තුව (එකක් ඩවුන් වුනොත් අනිත් එකට යයි)
+        const apiInstances = [
+            "https://pipedapi.kavin.rocks",
+            "https://pipedapi.tokhmi.xyz",
+            "https://api.piped.projectsegfau.lt",
+            "https://piped-api.garudalinux.org",
+            "https://piped-api.lunar.icu",
+            "https://pipedapi.smarthome-nj.de"
+        ];
+
+        // වැඩ කරන Server එක හොයාගෙන Data ගන්නා විශේෂ Function එක
+        async function fetchWithFallback(endpoint) {
+            for (let instance of apiInstances) {
+                try {
+                    const response = await fetch(`${instance}${endpoint}`);
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (error) {
+                    console.log(`Server down: ${instance}. Trying next...`);
+                }
+            }
+            throw new Error("All API servers are down.");
+        }
+
         async function startSearch() {
             const query = searchInput.value.trim();
             if (!query) return alert("Please enter a song name!");
 
-            trackInfo.innerText = "Searching...";
+            trackInfo.innerText = "Connecting to available servers...";
             searchBtn.disabled = true;
 
             try {
-                const searchResponse = await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=music_songs`);
-                const searchData = await searchResponse.json();
+                // Auto-Fallback එක හරහා Search කිරීම
+                const searchData = await fetchWithFallback(`/search?q=${encodeURIComponent(query)}&filter=music_songs`);
                 
-                if (!searchData.items || searchData.items.length === 0) throw new Error("No results found.");
+                if (!searchData || !searchData.items || searchData.items.length === 0) throw new Error("No results found.");
 
                 const firstResult = searchData.items[0];
                 const videoId = firstResult.url.split('/watch?v=')[1];
                 
-                // සින්දුව ප්ලේ කරන්න යැවීම
                 await playVideo(videoId, firstResult.title);
 
             } catch (error) {
-                trackInfo.innerText = "Error finding song. Try another search.";
+                trackInfo.innerText = "All servers are busy. Please try again later.";
                 console.error(error);
             }
             searchBtn.disabled = false;
         }
 
-        // 2. Video ID එකෙන් සින්දුව Play කිරීම සහ Related සින්දු හොයාගැනීම
         async function playVideo(videoId, title) {
-            trackInfo.innerText = "Loading Audio: " + title;
+            trackInfo.innerText = "Extracting Audio from active server...";
             nextBtn.disabled = true;
 
             try {
-                const streamResponse = await fetch(`https://pipedapi.kavin.rocks/streams/${videoId}`);
-                const streamData = await streamResponse.json();
+                // Auto-Fallback එක හරහා Stream Data ගැනීම
+                const streamData = await fetchWithFallback(`/streams/${videoId}`);
 
-                // හොඳම Audio Quality එක තේරීම
                 const audioStreams = streamData.audioStreams;
                 const bestAudio = audioStreams.find(stream => stream.mimeType.includes('audio/mp4')) || audioStreams[0];
 
-                // ඊළඟට Play වෙන්න Related Videos ලිස්ට් එකට දාගැනීම
                 if (streamData.relatedStreams) {
                     upcomingTracks = streamData.relatedStreams
-                        .filter(stream => stream.type === 'stream' && !stream.isShort) // Shorts අයින් කිරීම
+                        .filter(stream => stream.type === 'stream' && !stream.isShort)
                         .map(stream => ({
                             id: stream.url.split('/watch?v=')[1],
                             title: stream.title
                         }));
                 }
 
-                // Audio එක Play කිරීම
                 trackInfo.innerText = "Playing: " + title;
                 audioPlayer.src = bestAudio.url;
                 audioPlayer.style.display = "block";
@@ -146,14 +167,12 @@
             } catch (error) {
                 console.error("Playback error:", error);
                 trackInfo.innerText = "Error loading audio. Skipping to next...";
-                setTimeout(playNextTrack, 3000); // අවුලක් ගියොත් ඊළඟ සින්දුවට පනිනවා
+                setTimeout(playNextTrack, 3000);
             }
         }
 
-        // 3. ඊළඟ Related සින්දුවට යාම
         function playNextTrack() {
             if (upcomingTracks.length > 0) {
-                // List එකෙන් උඩින්ම තියෙන Related සින්දුව ගන්නවා
                 const nextTrack = upcomingTracks.shift(); 
                 playVideo(nextTrack.id, nextTrack.title);
             } else {
@@ -163,11 +182,9 @@
             }
         }
 
-        // සින්දුවක් ඉවර වුණාම සහ Error එකක් ආවොත් ඉබේම ඊළඟ එක ප්ලේ වෙන්න
         audioPlayer.addEventListener('ended', playNextTrack);
         audioPlayer.addEventListener('error', playNextTrack);
 
-        // Enter ඔබලා Search කරන්න පුළුවන් වෙන්න
         searchInput.addEventListener("keypress", function(event) {
             if (event.key === "Enter") {
                 event.preventDefault();
