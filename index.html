@@ -3,20 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>24/7 Smart Music Player</title>
-    <!-- ලස්සන Font එකක් -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Smart Music Player</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Animated Background එක */
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(-45deg, #1db954, #121212, #191414, #2ebd59);
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             color: #ffffff;
@@ -34,307 +28,175 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* Glassmorphism Player Container */
-        .player-container {
-            background: rgba(30, 30, 30, 0.6);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            padding: 40px 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        .player-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            max-width: 400px;
+            border-radius: 30px;
+            padding: 40px 30px;
             width: 100%;
+            max-width: 400px;
             text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
         }
 
-        h2 { 
-            margin-bottom: 25px; 
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.3);
-        }
-
-        /* කැරකෙන Vinyl Record ඇනිමේෂන් එක */
-        .artwork-wrapper {
+        /* සැබෑ සින්දුවේ පින්තූරය සඳහා */
+        .cover-art-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 25px auto;
+            border-radius: 50%;
+            padding: 5px;
+            background: linear-gradient(45deg, #1db954, #1ed760);
+            box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
             position: relative;
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 20px auto;
         }
 
-        .artwork {
+        .cover-art {
             width: 100%;
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            border: 4px solid #1db954;
-            box-shadow: 0 0 20px rgba(29, 185, 84, 0.4);
-            animation: spin 5s linear infinite;
-            animation-play-state: paused; /* මුලින් නතර කරලා තියෙන්නේ */
+            border: 3px solid #121212;
+            animation: spin 8s linear infinite;
+            animation-play-state: paused;
         }
 
-        /* මැද තියෙන හිඩස (Record එකක් වගේ පේන්න) */
-        .artwork-wrapper::after {
+        /* මැද තියෙන Vinyl හිඩස */
+        .cover-art-container::after {
             content: '';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 30px;
-            height: 30px;
-            background-color: #1e1e1e;
+            width: 40px;
+            height: 40px;
+            background: #121212;
             border-radius: 50%;
-            border: 2px solid #555;
+            border: 2px solid #2c5364;
         }
 
-        @keyframes spin {
-            100% { transform: rotate(360deg); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        .song-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
-        #track-info { 
-            margin-bottom: 25px; 
-            font-size: 15px; 
-            color: #d1d1d1; 
-            min-height: 45px;
-            font-weight: 300;
+        .artist-name {
+            font-size: 14px;
+            color: #b3b3b3;
+            margin-bottom: 30px;
+            min-height: 21px;
         }
-        
-        .search-box {
+
+        .controls {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-bottom: 25px;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-btn:hover { background: rgba(255, 255, 255, 0.2); transform: scale(1.1); }
+        .control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .play-btn {
+            background: #1db954;
+            width: 65px;
+            height: 65px;
+            font-size: 25px;
+            box-shadow: 0 5px 15px rgba(29, 185, 84, 0.4);
+        }
+        .play-btn:hover { background: #1ed760; }
+
+        .search-container {
+            display: flex;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 25px;
+            padding: 5px;
+            border: 1px solid rgba(255,255,255,0.1);
         }
 
         input[type="text"] {
-            padding: 12px 20px;
-            border-radius: 25px;
-            border: 1px solid rgba(255,255,255,0.2);
-            outline: none;
-            width: 100%;
-            font-size: 14px;
-            text-align: center;
-            background: rgba(0, 0, 0, 0.3);
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 12px 15px;
             color: white;
-            transition: 0.3s;
             font-family: 'Poppins', sans-serif;
+            outline: none;
         }
 
-        input[type="text"]:focus {
-            border-color: #1db954;
-            box-shadow: 0 0 10px rgba(29, 185, 84, 0.3);
-        }
-
-        button {
-            background: linear-gradient(45deg, #1db954, #1ed760);
+        .search-btn {
+            background: #1db954;
             color: white;
             border: none;
-            padding: 12px 20px;
-            font-size: 15px;
-            border-radius: 25px;
+            padding: 0 20px;
+            border-radius: 20px;
             cursor: pointer;
-            transition: all 0.3s ease;
             font-weight: 600;
-            font-family: 'Poppins', sans-serif;
-            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.4);
+            transition: 0.3s;
         }
 
-        button:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.6);
-        }
+        .search-btn:hover { background: #1ed760; }
 
-        button:active {
-            transform: translateY(1px);
-        }
+        #yt-player-container { display: none; }
 
-        button:disabled { 
-            background: #555; 
-            box-shadow: none;
-            cursor: not-allowed; 
-            transform: none;
-        }
-        
-        #next-btn { 
-            margin-top: 10px; 
-            display: none; 
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: none;
-        }
-
-        #next-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        #yt-player-container {
-            position: absolute;
-            top: -9999px;
-            left: -9999px;
-            visibility: hidden;
-        }
-
-        footer { 
-            margin-top: 30px; 
-            font-size: 12px; 
-            color: rgba(255,255,255,0.5); 
-            letter-spacing: 1px;
+        footer {
+            margin-top: 30px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
     </style>
 </head>
 <body>
 
-    <div class="player-container">
-        <h2>🎵 Smart Stream</h2>
-        
-        <!-- කැරකෙන රූපය -->
-        <div class="artwork-wrapper">
-            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop" id="artwork" class="artwork" alt="Vinyl Record">
+    <div class="player-card">
+        <div class="cover-art-container">
+            <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop" id="artwork" class="cover-art" alt="Cover Art">
         </div>
 
-        <p id="track-info">Waiting for your search...</p>
+        <div class="song-title" id="song-title">Smart Player</div>
+        <div class="artist-name" id="artist-name">Awaiting search...</div>
 
-        <div class="search-box">
-            <input type="text" id="search-input" placeholder="Search a song or artist...">
-            <button id="search-btn" onclick="startSearch()">🔍 Search & Play</button>
+        <div class="controls">
+            <button class="control-btn play-btn" id="play-pause-btn" onclick="togglePlay()" disabled>▶</button>
+            <button class="control-btn" id="next-btn" onclick="playNextTrack()" disabled>⏭</button>
         </div>
-        
-        <button id="next-btn" onclick="playNextTrack()">⏭ Skip to Next Song</button>
+
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search song...">
+            <button class="search-btn" id="search-btn" onclick="startSearch()">Search</button>
+        </div>
     </div>
     
     <div id="yt-player-container">
         <div id="youtube-player"></div>
     </div>
 
-    <footer>DEVELOPED BY SUPUN DILSHAN</footer>
+    <footer>Developed by Supun Dilshan</footer>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
-
-    <script>
-        const trackInfo = document.getElementById('track-info');
-        const searchInput = document.getElementById('search-input');
-        const searchBtn = document.getElementById('search-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const artwork = document.getElementById('artwork');
-
-        let upcomingTracks = [];
-        const API_BASE = "https://ytmusicapi-ruby.vercel.app";
-        
-        let ytPlayer;
-        let isPlayerReady = false;
-
-        function onYouTubeIframeAPIReady() {
-            ytPlayer = new YT.Player('youtube-player', {
-                height: '10',
-                width: '10',
-                playerVars: {
-                    'autoplay': 1,
-                    'controls': 0,
-                    'showinfo': 0,
-                    'rel': 0
-                },
-                events: {
-                    'onReady': () => { isPlayerReady = true; },
-                    'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError
-                }
-            });
-        }
-
-        function onPlayerStateChange(event) {
-            // සින්දුව ප්ලේ වෙද්දි රූපය කරකවන්න
-            if (event.data === YT.PlayerState.PLAYING) {
-                artwork.style.animationPlayState = 'running';
-            } else {
-                artwork.style.animationPlayState = 'paused';
-            }
-
-            // සින්දුව ඉවර වුණාම ඊළඟ එකට යන්න
-            if (event.data === YT.PlayerState.ENDED) {
-                playNextTrack();
-            }
-        }
-
-        function onPlayerError(event) {
-            console.error("YouTube Player Error:", event.data);
-            trackInfo.innerText = "Error loading track. Skipping to next...";
-            setTimeout(playNextTrack, 2000);
-        }
-
-        async function startSearch() {
-            if (!isPlayerReady) return alert("Player is still loading, please wait a second...");
-
-            const query = searchInput.value.trim();
-            if (!query) return alert("Please enter a song name!");
-
-            trackInfo.innerText = "Searching our custom server...";
-            searchBtn.disabled = true;
-            artwork.style.animationPlayState = 'paused';
-
-            try {
-                const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
-                const data = await response.json();
-                
-                if (data.error) throw new Error(data.error);
-
-                upcomingTracks = data.related || [];
-                playVideo(data.videoId, data.title);
-
-            } catch (error) {
-                trackInfo.innerText = "Error finding song. Please try again.";
-                console.error(error);
-            }
-            searchBtn.disabled = false;
-        }
-
-        function playVideo(videoId, title) {
-            trackInfo.innerHTML = `<strong>Playing:</strong><br>${title}`;
-            nextBtn.style.display = "inline-block";
-            nextBtn.disabled = false;
-            
-            ytPlayer.loadVideoById(videoId);
-
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: title,
-                    artist: "24/7 Smart Stream",
-                    album: "Supun's Music Player",
-                    artwork: [
-                        { src: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop", sizes: "512x512", type: "image/jpeg" }
-                    ]
-                });
-
-                navigator.mediaSession.setActionHandler('nexttrack', () => {
-                    playNextTrack();
-                });
-            }
-        }
-
-        function playNextTrack() {
-            if (upcomingTracks.length > 0) {
-                artwork.style.animationPlayState = 'paused';
-                trackInfo.innerText = "Loading next song...";
-                
-                const randomIndex = Math.floor(Math.random() * upcomingTracks.length);
-                const nextTrack = upcomingTracks.splice(randomIndex, 1)[0]; 
-                
-                playVideo(nextTrack.id, nextTrack.title);
-            } else {
-                trackInfo.innerText = "End of similar tracks. Please search again.";
-                ytPlayer.stopVideo();
-                nextBtn.style.display = "none";
-                artwork.style.animationPlayState = 'paused';
-            }
-        }
-
-        searchInput.addEventListener("keypress", function(event) {
-            if (event.key === "Enter") {
-                event.preventDefault();
-                startSearch();
-            }
-        });
-    </script>
-
-</body>
+    </body>
 </html>
