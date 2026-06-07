@@ -1,511 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colorful IMEI Barcode Scanner</title>
+    <title>24/7 Smart Music Player</title>
     <style>
-        /* Animated Colorful Background */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-            color: #333;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            box-sizing: border-box;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .header {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
             text-align: center;
-            margin-bottom: 15px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            font-size: 1.2em;
+            padding: 50px;
         }
-
-        .controls {
+        .player-container {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-width: 450px;
+            margin: 0 auto;
+        }
+        h2 { margin-bottom: 5px; color: #1db954; }
+        #track-info { margin-bottom: 20px; font-size: 14px; color: #b3b3b3; min-height: 20px; }
+        
+        .search-box {
             display: flex;
-            gap: 20px;
+            justify-content: center;
+            gap: 10px;
             margin-bottom: 20px;
         }
-
-        /* Glassmorphism Panels */
-        .panel {
-            background: rgba(255, 255, 255, 0.92);
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        h3 {
-            margin-top: 0;
-            color: #4a00e0;
-        }
-
-        textarea {
-            width: 100%;
-            height: 100px;
-            resize: vertical;
+        input[type="text"] {
             padding: 10px;
-            box-sizing: border-box;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 1em;
-            transition: border-color 0.3s;
-        }
-        
-        textarea:focus {
+            border-radius: 25px;
+            border: none;
             outline: none;
-            border-color: #8e2de2;
-            box-shadow: 0 0 8px rgba(142, 45, 226, 0.3);
+            width: 60%;
+            font-size: 14px;
+            text-align: center;
         }
-
-        /* Colorful Gradient Button */
         button {
-            background: linear-gradient(45deg, #ff512f, #dd2476);
+            background-color: #1db954;
             color: white;
             border: none;
-            padding: 10px 18px;
+            padding: 10px 20px;
+            font-size: 14px;
             border-radius: 25px;
             cursor: pointer;
-            margin-top: 10px;
+            transition: 0.3s;
             font-weight: bold;
-            font-size: 0.95em;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
-            transition: all 0.3s ease;
         }
-
-        button:hover { 
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(221, 36, 118, 0.6);
-        }
-
-        button:active {
-            transform: translateY(1px);
-        }
-
-        .btn-secondary {
-            background: linear-gradient(45deg, #11998e, #38ef7d);
-            box-shadow: 0 4px 15px rgba(56, 239, 125, 0.4);
-        }
-
-        .btn-secondary:hover {
-            box-shadow: 0 6px 20px rgba(56, 239, 125, 0.6);
-        }
-
-        .scan-input-wrapper {
-            margin-top: 15px;
-        }
-
-        /* Big Colorful Input Box */
-        input[type="text"] {
-            width: 100%;
-            padding: 18px;
-            font-size: 1.4em;
-            box-sizing: border-box;
-            border: 3px solid #23a6d5;
-            border-radius: 10px;
-            background-color: #f0fdfa;
-            color: #0f172a;
-            font-weight: bold;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #e73c7e;
-            background-color: #fff0f5;
-            box-shadow: 0 0 15px rgba(231, 60, 126, 0.4);
-        }
-
-        .workspace {
-            display: flex;
-            gap: 20px;
-            flex: 1;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .list-container, .log-container {
-            flex: 1;
-            overflow-y: auto;
-            background: rgba(255, 255, 255, 0.7);
-            border-radius: 0 0 15px 15px;
-            padding: 10px;
-        }
-
-        .panel-header {
-            padding: 15px; 
-            margin: 0; 
-            border-bottom: 2px solid #eee; 
-            background: rgba(255,255,255,0.9);
-            border-radius: 15px 15px 0 0;
-            color: #23a6d5;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .stats-badge {
-            background: #fff3cd;
-            color: #856404;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.85em;
-            font-weight: bold;
-            border: 1px solid #ffeeba;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        li {
-            padding: 10px 15px;
-            border-bottom: 1px solid #ddd;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 1.1em;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            border-radius: 6px;
-            margin-bottom: 4px;
-        }
-
-        li:hover {
-            background-color: rgba(255, 255, 255, 0.9);
-        }
-
-        /* Colorful Matched Highlight */
-        .matched {
-            background: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);
-            color: #0b4a1b;
-            font-weight: bold;
-            border-left: 6px solid #00b09b;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        /* Utility class to hide elements */
-        .hidden {
-            display: none !important;
-        }
-
-        .log-entry {
-            padding: 8px 10px;
-            border-bottom: 1px dashed #ccc;
-            font-family: monospace;
-            font-size: 1.05em;
-            border-radius: 4px;
-            margin-bottom: 4px;
-            background: white;
-        }
-
-        .log-success { 
-            color: #0f5132; 
-            background-color: #d1e7dd;
-            border-left: 4px solid #198754;
-        }
+        button:hover { background-color: #1ed760; }
+        button:disabled { background-color: #555; cursor: not-allowed; }
         
-        .log-error { 
-            color: #842029; 
-            background-color: #f8d7da;
-            border-left: 4px solid #dc3545;
-            font-weight: bold; 
-        }
-
-        .footer {
-            text-align: center;
-            color: white;
-            font-weight: bold;
-            font-size: 1em;
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.4);
-            margin-top: 5px;
-            letter-spacing: 1px;
-        }
-
-        /* Custom Colorful Scrollbar */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb { background: #e73c7e; border-radius: 5px; }
-        ::-webkit-scrollbar-thumb:hover { background: #ee7752; }
+        #next-btn { margin-top: 10px; display: none; }
+        audio { width: 100%; margin-top: 20px; outline: none; display: none; }
+        footer { margin-top: 40px; font-size: 12px; color: #666; }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <h1>✨ IMEI Barcode Scanner Tool ✨</h1>
-    </div>
-
-    <div class="controls">
-        <div class="panel">
-            <h3>1. Load Master List</h3>
-            <textarea id="pasteArea" placeholder="Paste IMEIs here (one per line)..."></textarea>
-            <div style="display: flex; gap: 10px;">
-                <button onclick="loadList()">Load List & Audio 🚀</button>
-            </div>
+    <div class="player-container">
+        <h2>🎵 Smart Stream Player</h2>
+        
+        <div class="search-box">
+            <input type="text" id="search-input" placeholder="Search a song or artist...">
+            <button id="search-btn" onclick="startSearch()">Search & Play</button>
         </div>
 
-        <div class="panel">
-            <h3>2. Scan Barcode</h3>
-            <div class="scan-input-wrapper">
-                <input type="text" id="scanInput" placeholder="Awaiting scanner input..." disabled>
-            </div>
-        </div>
+        <p id="track-info">Waiting for your search...</p>
+        
+        <audio id="audio-player" controls></audio>
+        <button id="next-btn" onclick="playNextTrack()">⏭ Skip to Next Similar Song</button>
     </div>
 
-    <div class="workspace">
-        <div class="panel" style="padding: 0;">
-            <div class="panel-header">
-                <h3 style="margin:0;">📋 Master IMEI List</h3>
-                <span class="stats-badge" id="statsBadge">Total: 0 | Scanned: 0 | Missing: 0</span>
-            </div>
-            
-            <div style="padding: 10px; background: #fff; border-bottom: 1px solid #eee; display: flex; gap: 10px;">
-                <button class="btn-secondary" onclick="toggleMissing()" id="toggleBtn" style="margin: 0; flex: 1;">👁️ Hide Scanned</button>
-                <button class="btn-secondary" onclick="copyMissing()" style="margin: 0; flex: 1;">📋 Copy Missing</button>
-            </div>
-
-            <div class="list-container" id="listContainer">
-                <ul id="imeiList">
-                    <li style="color: #999; text-align: center; border: none; margin-top: 20px;">List will appear here...</li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="panel" style="padding: 0;">
-            <div class="panel-header">
-                <h3 style="margin:0;">📝 Scan Log</h3>
-            </div>
-            <div class="log-container" id="logContainer">
-                </div>
-        </div>
-    </div>
-
-    <div class="footer">
-        👨‍💻 Dev By 'Supun Dilshan'
-    </div>
+    <footer>Developed by Supun Dilshan</footer>
 
     <script>
-        let imeiData = [];
-        let audioCtx;
-        let showMissingOnly = false;
+        const audioPlayer = document.getElementById('audio-player');
+        const trackInfo = document.getElementById('track-info');
+        const searchInput = document.getElementById('search-input');
+        const searchBtn = document.getElementById('search-btn');
+        const nextBtn = document.getElementById('next-btn');
 
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }
+        let upcomingTracks = []; // ඊළඟට ප්ලේ වෙන්න තියෙන සමාන සින්දු ලිස්ට් එක
 
-        function playBeep(type) {
-            if (!audioCtx) return;
-            const oscillator = audioCtx.createOscillator();
-            const gainNode = audioCtx.createGain();
-            
-            oscillator.connect(gainNode);
-            gainNode.connect(audioCtx.destination);
-            
-            if (type === 'success') {
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(800, audioCtx.currentTime); 
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.15); 
-            } else if (type === 'error') {
-                oscillator.type = 'sawtooth';
-                oscillator.frequency.setValueAtTime(200, audioCtx.currentTime); 
-                gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.4); 
-            }
-        }
+        // 1. Search කරලා පළවෙනි සින්දුව හොයාගැනීම
+        async function startSearch() {
+            const query = searchInput.value.trim();
+            if (!query) return alert("Please enter a song name!");
 
-        function updateStats() {
-            const total = imeiData.length;
-            const scanned = imeiData.filter(item => item.scanned).length;
-            const missing = total - scanned;
-            
-            const badge = document.getElementById('statsBadge');
-            badge.textContent = `Total: ${total} | Scanned: ${scanned} | Missing: ${missing}`;
-            
-            if (missing === 0 && total > 0) {
-                badge.style.background = '#d4edda';
-                badge.style.color = '#155724';
-                badge.style.borderColor = '#c3e6cb';
-            } else {
-                badge.style.background = '#fff3cd';
-                badge.style.color = '#856404';
-                badge.style.borderColor = '#ffeeba';
-            }
-        }
+            trackInfo.innerText = "Searching...";
+            searchBtn.disabled = true;
 
-        function loadList() {
-            initAudio(); 
-            
-            const text = document.getElementById('pasteArea').value;
-            const lines = text.split('\n');
-            const listEl = document.getElementById('imeiList');
-            
-            imeiData = [];
-            listEl.innerHTML = ''; 
-            showMissingOnly = false;
-            document.getElementById('toggleBtn').innerHTML = "👁️ Hide Scanned";
-
-            lines.forEach((line, index) => {
-                const imei = line.trim();
-                if (imei) {
-                    imeiData.push({ id: 'imei-' + index, value: imei, scanned: false });
-                    
-                    const li = document.createElement('li');
-                    li.id = 'imei-' + index;
-                    li.textContent = imei;
-                    listEl.appendChild(li);
-                }
-            });
-
-            updateStats();
-
-            const scanInput = document.getElementById('scanInput');
-            scanInput.disabled = false;
-            scanInput.focus();
-
-            logAction(`Loaded ${imeiData.length} IMEIs into master list.`, 'info');
-        }
-
-        function logAction(message, type) {
-            const logContainer = document.getElementById('logContainer');
-            const entry = document.createElement('div');
-            entry.className = 'log-entry';
-            
-            const time = new Date().toLocaleTimeString();
-            
-            if (type === 'success') {
-                entry.classList.add('log-success');
-                entry.innerHTML = `[${time}] ✔️ ${message}`;
-            } else if (type === 'error') {
-                entry.classList.add('log-error');
-                entry.innerHTML = `[${time}] ❌ ${message}`;
-            } else {
-                entry.innerHTML = `[${time}] ℹ️ ${message}`;
-            }
-
-            logContainer.prepend(entry); 
-        }
-
-        document.getElementById('scanInput').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                const scannedValue = this.value.trim();
+            try {
+                const searchResponse = await fetch(`https://pipedapi.kavin.rocks/search?q=${encodeURIComponent(query)}&filter=music_songs`);
+                const searchData = await searchResponse.json();
                 
-                if (!scannedValue) return;
+                if (!searchData.items || searchData.items.length === 0) throw new Error("No results found.");
 
-                processScan(scannedValue);
+                const firstResult = searchData.items[0];
+                const videoId = firstResult.url.split('/watch?v=')[1];
                 
-                this.value = ''; 
-                this.focus();
+                // සින්දුව ප්ලේ කරන්න යැවීම
+                await playVideo(videoId, firstResult.title);
+
+            } catch (error) {
+                trackInfo.innerText = "Error finding song. Try another search.";
+                console.error(error);
             }
-        });
+            searchBtn.disabled = false;
+        }
 
-        function processScan(scannedValue) {
-            const matchedItem = imeiData.find(item => item.value === scannedValue);
+        // 2. Video ID එකෙන් සින්දුව Play කිරීම සහ Related සින්දු හොයාගැනීම
+        async function playVideo(videoId, title) {
+            trackInfo.innerText = "Loading Audio: " + title;
+            nextBtn.disabled = true;
 
-            if (matchedItem) {
-                playBeep('success');
+            try {
+                const streamResponse = await fetch(`https://pipedapi.kavin.rocks/streams/${videoId}`);
+                const streamData = await streamResponse.json();
+
+                // හොඳම Audio Quality එක තේරීම
+                const audioStreams = streamData.audioStreams;
+                const bestAudio = audioStreams.find(stream => stream.mimeType.includes('audio/mp4')) || audioStreams[0];
+
+                // ඊළඟට Play වෙන්න Related Videos ලිස්ට් එකට දාගැනීම
+                if (streamData.relatedStreams) {
+                    upcomingTracks = streamData.relatedStreams
+                        .filter(stream => stream.type === 'stream' && !stream.isShort) // Shorts අයින් කිරීම
+                        .map(stream => ({
+                            id: stream.url.split('/watch?v=')[1],
+                            title: stream.title
+                        }));
+                }
+
+                // Audio එක Play කිරීම
+                trackInfo.innerText = "Playing: " + title;
+                audioPlayer.src = bestAudio.url;
+                audioPlayer.style.display = "block";
+                nextBtn.style.display = "inline-block";
                 
-                if (!matchedItem.scanned) {
-                    matchedItem.scanned = true;
-                    updateStats();
-                }
+                await audioPlayer.play();
+                nextBtn.disabled = false;
 
-                logAction(`Found: ${scannedValue}`, 'success');
+            } catch (error) {
+                console.error("Playback error:", error);
+                trackInfo.innerText = "Error loading audio. Skipping to next...";
+                setTimeout(playNextTrack, 3000); // අවුලක් ගියොත් ඊළඟ සින්දුවට පනිනවා
+            }
+        }
 
-                const element = document.getElementById(matchedItem.id);
-                if (element) {
-                    element.classList.add('matched');
-                    
-                    // If we are currently hiding scanned items, hide this one instantly
-                    if (showMissingOnly) {
-                        element.classList.add('hidden');
-                    } else {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                }
+        // 3. ඊළඟ Related සින්දුවට යාම
+        function playNextTrack() {
+            if (upcomingTracks.length > 0) {
+                // List එකෙන් උඩින්ම තියෙන Related සින්දුව ගන්නවා
+                const nextTrack = upcomingTracks.shift(); 
+                playVideo(nextTrack.id, nextTrack.title);
             } else {
-                playBeep('error');
-                logAction(`Not Found: ${scannedValue}`, 'error');
+                trackInfo.innerText = "End of similar tracks. Please search again.";
+                audioPlayer.style.display = "none";
+                nextBtn.style.display = "none";
             }
         }
 
-        function toggleMissing() {
-            showMissingOnly = !showMissingOnly;
-            const btn = document.getElementById('toggleBtn');
-            
-            if (showMissingOnly) {
-                btn.innerHTML = "👁️ Show All";
-            } else {
-                btn.innerHTML = "👁️ Hide Scanned";
-            }
+        // සින්දුවක් ඉවර වුණාම සහ Error එකක් ආවොත් ඉබේම ඊළඟ එක ප්ලේ වෙන්න
+        audioPlayer.addEventListener('ended', playNextTrack);
+        audioPlayer.addEventListener('error', playNextTrack);
 
-            imeiData.forEach(item => {
-                const el = document.getElementById(item.id);
-                if (el) {
-                    if (showMissingOnly && item.scanned) {
-                        el.classList.add('hidden');
-                    } else {
-                        el.classList.remove('hidden');
-                    }
-                }
-            });
-        }
-
-        function copyMissing() {
-            const missingSerials = imeiData.filter(item => !item.scanned).map(item => item.value);
-            
-            if (missingSerials.length === 0) {
-                alert("Awesome! There are no missing serials. Everything is scanned.");
-                return;
-            }
-
-            const textToCopy = missingSerials.join('\n');
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                logAction(`Copied ${missingSerials.length} missing serials to clipboard.`, 'info');
-                alert(`Successfully copied ${missingSerials.length} missing serials to your clipboard!`);
-            }).catch(err => {
-                logAction(`Failed to copy to clipboard.`, 'error');
-                alert("Failed to copy. Please check your browser permissions.");
-            });
-        }
-
-        // Keep focus on input
-        document.body.addEventListener('click', function(e) {
-            const scanInput = document.getElementById('scanInput');
-            if (!scanInput.disabled && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'TEXTAREA') {
-                scanInput.focus();
+        // Enter ඔබලා Search කරන්න පුළුවන් වෙන්න
+        searchInput.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                startSearch();
             }
         });
     </script>
+
 </body>
 </html>
