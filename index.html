@@ -56,7 +56,6 @@
         
         #next-btn { margin-top: 15px; display: none; }
         
-        /* YouTube Player එක හංගනවා (සද්දෙ විතරක් එන්න) */
         #yt-player-container {
             position: absolute;
             top: -9999px;
@@ -104,7 +103,6 @@
         let ytPlayer;
         let isPlayerReady = false;
 
-        // YouTube API එක ලෝඩ් වුණාම Player එක හදනවා
         function onYouTubeIframeAPIReady() {
             ytPlayer = new YT.Player('youtube-player', {
                 height: '100',
@@ -123,14 +121,12 @@
             });
         }
 
-        // සින්දුවක් ඉවර වුණාම ඊළඟ එක Play කරන්න
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.ENDED) {
                 playNextTrack();
             }
         }
 
-        // Error එකක් ආවොත් ඊළඟ එකට පනින්න
         function onPlayerError(event) {
             console.error("YouTube Player Error:", event.data);
             trackInfo.innerText = "Error loading track. Skipping to next...";
@@ -147,7 +143,6 @@
             searchBtn.disabled = true;
 
             try {
-                // ඔයාගේ Vercel එකෙන් සින්දුව හොයනවා
                 const response = await fetch(`${API_BASE}/search?q=${encodeURIComponent(query)}`);
                 const data = await response.json();
                 
@@ -168,13 +163,32 @@
             nextBtn.style.display = "inline-block";
             nextBtn.disabled = false;
             
-            // කෙලින්ම YouTube එකෙන් Play කරනවා
             ytPlayer.loadVideoById(videoId);
+
+            // Notification Bar එකේ Player එක ලස්සනට හදමු (MediaSession API)
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: title,
+                    artist: "24/7 Smart Stream",
+                    album: "Supun's Music Player",
+                    artwork: [
+                        { src: "https://cdn-icons-png.flaticon.com/512/3063/3063822.png", sizes: "512x512", type: "image/png" }
+                    ]
+                });
+
+                // Notification බාර් එකේ Next බටන් එක වැඩ කරන්න
+                navigator.mediaSession.setActionHandler('nexttrack', () => {
+                    playNextTrack();
+                });
+            }
         }
 
         function playNextTrack() {
             if (upcomingTracks.length > 0) {
-                const nextTrack = upcomingTracks.shift(); 
+                // වෙනස් ආර්ටිස්ට්ලා එන්න ලිස්ට් එකෙන් Random සින්දුවක් තේරීම
+                const randomIndex = Math.floor(Math.random() * upcomingTracks.length);
+                const nextTrack = upcomingTracks.splice(randomIndex, 1)[0]; 
+                
                 playVideo(nextTrack.id, nextTrack.title);
             } else {
                 trackInfo.innerText = "End of similar tracks. Please search again.";
