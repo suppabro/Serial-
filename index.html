@@ -155,8 +155,13 @@
 
 /* Pure Black Search Container - Vertical Stack */
         .search-container {
+            display: flex;
+            flex-direction: column; /* මේකෙන් තමයි එක යට එකට ගේන්නේ */
+            gap: 12px; /* කොටු දෙක අතර පරතරය */
             width: 100%;
-            margin-top: 10px;
+            background: transparent; /* පරණ බැක්ග්‍රවුන්ඩ් එක අයින් කළා */
+            border: none; /* පරණ බෝඩර් එක අයින් කළා */
+            padding: 0;
         }
 
         input[type="text"] {
@@ -170,8 +175,7 @@
             font-family: 'Poppins', sans-serif;
             outline: none;
             transition: all 0.3s ease;
-            margin-bottom: 12px; /* බාර් එක සහ බටන් එක අතර පරතරය */
-            text-align: center; /* ටයිප් කරන අකුරු මැදට එන්න */
+            text-align: center;
         }
 
         input[type="text"]:focus {
@@ -186,7 +190,7 @@
             background: transparent;
             color: #1db954;
             border: 1px solid #1db954;
-            padding: 12px 0;
+            padding: 14px 0;
             border-radius: 16px;
             cursor: pointer;
             font-weight: 600;
@@ -200,7 +204,6 @@
             color: #000000;
             box-shadow: 0 0 20px rgba(29, 185, 84, 0.4);
         }
-
         #yt-player-container {
             position: absolute;
             top: -9999px;
