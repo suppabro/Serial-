@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Live Radio</title>
+    <title>Smart Music Player</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -39,31 +39,9 @@
             max-width: 400px;
             text-align: center;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            position: relative;
         }
 
-        /* Live Badge */
-        .live-badge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: #ff3b30;
-            color: white;
-            padding: 3px 10px;
-            font-size: 10px;
-            font-weight: bold;
-            border-radius: 10px;
-            letter-spacing: 1px;
-            animation: pulse 2s infinite;
-            display: none;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
+        /* සැබෑ සින්දුවේ පින්තූරය සඳහා */
         .cover-art-container {
             width: 200px;
             height: 200px;
@@ -85,6 +63,7 @@
             animation-play-state: paused;
         }
 
+        /* මැද තියෙන Vinyl හිඩස */
         .cover-art-container::after {
             content: '';
             position: absolute;
@@ -111,7 +90,7 @@
         .artist-name {
             font-size: 14px;
             color: #b3b3b3;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
             min-height: 21px;
         }
 
@@ -120,7 +99,7 @@
             align-items: center;
             justify-content: center;
             gap: 20px;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .control-btn {
@@ -149,29 +128,6 @@
             box-shadow: 0 5px 15px rgba(29, 185, 84, 0.4);
         }
         .play-btn:hover { background: #1ed760; }
-
-        /* Radio Mode Buttons */
-        .radio-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .radio-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-weight: 600;
-        }
-
-        .radio-btn.active-host { background: #ff9500; border-color: #ff9500; color: #000; }
-        .radio-btn.active-listen { background: #1db954; border-color: #1db954; color: #000; }
 
         .search-container {
             display: flex;
@@ -204,16 +160,7 @@
 
         .search-btn:hover { background: #1ed760; }
 
-        #yt-player-container {
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-    width: 10px;
-    height: 10px;
-    opacity: 0;
-    pointer-events: none;
-}
-
+        #yt-player-container { display: none; }
 
         footer {
             margin-top: 30px;
@@ -227,13 +174,11 @@
 <body>
 
     <div class="player-card">
-        <div class="live-badge" id="live-badge">LIVE</div>
-        
         <div class="cover-art-container">
             <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=500&auto=format&fit=crop" id="artwork" class="cover-art" alt="Cover Art">
         </div>
 
-        <div class="song-title" id="song-title">Smart Radio</div>
+        <div class="song-title" id="song-title">Smart Player</div>
         <div class="artist-name" id="artist-name">Awaiting search...</div>
 
         <div class="controls">
@@ -241,19 +186,18 @@
             <button class="control-btn" id="next-btn" onclick="playNextTrack()" disabled>⏭</button>
         </div>
 
-        <div class="radio-controls">
-            <button class="radio-btn" id="btn-broadcast" onclick="toggleBroadcast()">🎙️ Broadcast</button>
-            <button class="radio-btn" id="btn-listen" onclick="toggleListen()">📻 Listen Live</button>
-        </div>
-
-        <div class="search-container" id="search-section">
+        <div class="search-container">
             <input type="text" id="search-input" placeholder="Search song...">
             <button class="search-btn" id="search-btn" onclick="startSearch()">Search</button>
         </div>
     </div>
     
     <div id="yt-player-container">
-        <div id="youtube
+        <div id="youtube-player"></div>
+    </div>
+
+    <footer>Developed by Supun Dilshan</footer>
+<script src="https://www.youtube.com/iframe_api"></script>
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
@@ -264,23 +208,12 @@
         const playPauseBtn = document.getElementById('play-pause-btn');
         const nextBtn = document.getElementById('next-btn');
         const artwork = document.getElementById('artwork');
-        const btnBroadcast = document.getElementById('btn-broadcast');
-        const btnListen = document.getElementById('btn-listen');
-        const searchSection = document.getElementById('search-section');
-        const liveBadge = document.getElementById('live-badge');
 
         let upcomingTracks = [];
         let isPlaying = false;
-        let currentVideoId = null;
         
-        // Radio State Variables
-        let isBroadcasting = false;
-        let isListening = false;
-        let syncInterval = null;
-        
-        // APIs
+        // Vercel එකයි, Backup විදියට Piped එකයි දෙකම තියෙනවා.
         const VERCEL_API = "https://ytmusicapi-ruby.vercel.app";
-        const FIREBASE_DB = "https://ytmusic-7c501-default-rtdb.firebaseio.com/live.json";
         const FALLBACK_APIS = [
             "https://pipedapi.tokhmi.xyz", 
             "https://pipedapi.kavin.rocks",
@@ -312,16 +245,13 @@
                 playPauseBtn.innerText = '▶';
                 isPlaying = false;
             } else if (event.data === YT.PlayerState.ENDED) {
-                if (isListening) {
-                    artistName.innerText = "Waiting for host to play next...";
-                } else {
-                    playNextTrack();
-                }
+                playNextTrack();
             }
         }
 
         function onPlayerError(event) {
-            if(!isListening) { setTimeout(playNextTrack, 2000); }
+            artistName.innerText = "Error loading. Skipping...";
+            setTimeout(playNextTrack, 2000);
         }
 
         function togglePlay() {
@@ -329,81 +259,6 @@
             if (isPlaying) { ytPlayer.pauseVideo(); } 
             else { ytPlayer.playVideo(); }
         }
-
-        // --- Radio Logic ---
-
-        function toggleBroadcast() {
-            if (isListening) toggleListen(); // Turn off listening if on
-            isBroadcasting = !isBroadcasting;
-            
-            if (isBroadcasting) {
-                btnBroadcast.classList.add('active-host');
-                btnBroadcast.innerText = "🔴 Broadcasting";
-                liveBadge.style.display = "block";
-                liveBadge.innerText = "HOSTING";
-                alert("You are now the Host! Songs you play will sync to everyone.");
-                // Update currently playing song to DB
-                if (currentVideoId) { updateFirebase(currentVideoId, songTitle.innerText); }
-            } else {
-                btnBroadcast.classList.remove('active-host');
-                btnBroadcast.innerText = "🎙️ Broadcast";
-                liveBadge.style.display = "none";
-            }
-        }
-
-        function toggleListen() {
-            if (isBroadcasting) toggleBroadcast(); // Turn off host if on
-            isListening = !isListening;
-
-            if (isListening) {
-                btnListen.classList.add('active-listen');
-                btnListen.innerText = "🎧 Listening Live";
-                searchSection.style.display = "none"; // Hide search for listeners
-                nextBtn.style.display = "none";
-                liveBadge.style.display = "block";
-                liveBadge.innerText = "LIVE SYNC";
-                
-                // Start polling Firebase every 4 seconds
-                syncInterval = setInterval(syncFromFirebase, 4000);
-                syncFromFirebase(); // Initial sync
-            } else {
-                btnListen.classList.remove('active-listen');
-                btnListen.innerText = "📻 Listen Live";
-                searchSection.style.display = "flex";
-                nextBtn.style.display = "inline-block";
-                liveBadge.style.display = "none";
-                clearInterval(syncInterval);
-            }
-        }
-
-        async function updateFirebase(videoId, title) {
-            if (!isBroadcasting) return;
-            try {
-                await fetch(FIREBASE_DB, {
-                    method: 'PUT',
-                    body: JSON.stringify({
-                        videoId: videoId,
-                        title: title,
-                        startTime: Date.now()
-                    })
-                });
-            } catch (e) { console.error("Firebase update failed", e); }
-        }
-
-        async function syncFromFirebase() {
-            try {
-                const res = await fetch(FIREBASE_DB);
-                const data = await res.json();
-                
-                if (data && data.videoId && data.videoId !== currentVideoId) {
-                    // New song detected! Calculate how many seconds have passed
-                    const elapsedSeconds = (Date.now() - data.startTime) / 1000;
-                    playVideo(data.videoId, data.title, elapsedSeconds);
-                }
-            } catch (e) { console.error("Sync failed", e); }
-        }
-
-        // --- End Radio Logic ---
 
         async function fetchSongData(query) {
             try {
@@ -431,6 +286,7 @@
             const query = searchInput.value.trim();
             if (!query) return;
 
+            // YouTube Player එක ලෝඩ් වෙලා නැත්තම් මෙතනින් කියයි
             if (!isPlayerReady) {
                 songTitle.innerText = "Connecting Player...";
                 artistName.innerText = "Please wait 2 seconds & click Search again.";
@@ -453,33 +309,26 @@
             searchBtn.disabled = false;
         }
 
-        function playVideo(videoId, title, startSeconds = 0) {
-            currentVideoId = videoId;
+        function playVideo(videoId, title) {
             const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
             artwork.src = thumbnailUrl;
             
             const shortTitle = title.length > 30 ? title.substring(0, 30) + "..." : title;
             songTitle.innerText = shortTitle;
-            artistName.innerText = isListening ? "Live Radio 🎵" : "Now Playing 🎵";
+            artistName.innerText = "Now Playing 🎵";
             
             playPauseBtn.disabled = false;
             nextBtn.disabled = false;
             
-            // Load video at specific time (for sync)
-            ytPlayer.loadVideoById({videoId: videoId, startSeconds: startSeconds});
-
-            // If broadcasting, tell Firebase the new song started NOW
-            if (isBroadcasting && startSeconds === 0) {
-                updateFirebase(videoId, shortTitle);
-            }
+            ytPlayer.loadVideoById(videoId);
 
             if ('mediaSession' in navigator) {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: shortTitle,
-                    artist: isListening ? "Smart Live Radio" : "Smart Stream Player",
+                    artist: "Smart Stream Player",
                     artwork: [{ src: thumbnailUrl, sizes: "512x512", type: "image/jpeg" }]
                 });
-                navigator.mediaSession.setActionHandler('nexttrack', () => { if(!isListening) playNextTrack(); });
+                navigator.mediaSession.setActionHandler('nexttrack', playNextTrack);
                 navigator.mediaSession.setActionHandler('play', togglePlay);
                 navigator.mediaSession.setActionHandler('pause', togglePlay);
             }
@@ -504,5 +353,6 @@
             if (e.key === "Enter") { e.preventDefault(); startSearch(); }
         });
     </script>
-</body>
+
+    </body>
 </html>
