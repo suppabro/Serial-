@@ -204,7 +204,16 @@
 
         .search-btn:hover { background: #1ed760; }
 
-        #yt-player-container { display: none; }
+        #yt-player-container {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+    width: 10px;
+    height: 10px;
+    opacity: 0;
+    pointer-events: none;
+}
+
 
         footer {
             margin-top: 30px;
